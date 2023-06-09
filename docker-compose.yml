@@ -1,18 +1,36 @@
-worker_processes 1;
+version: '3'
 
-events {
-  worker_connections 1024;
-}
+services:
+  drupal:
+    image: bitnami/drupal:latest
+    ports:
+      - '80:8080'
+    depends_on:
+      - db
+    environment:
+      - DRUPAL_DATABASE_HOST=db
+      - DRUPAL_DATABASE_PORT_NUMBER=3306
+      - DRUPAL_DATABASE_USER=${USER}
+      - DRUPAL_DATABASE_PASSWORD=${PASSWORD}
+      - DRUPAL_DATABASE_NAME=${DATABASE}
 
-http {
-  server {
-    listen 80;
-    server_name edayalcin.me;
+db:
+  image: bitnami/mariadb:latest
+  environment:
+    - MARIADB_USER=YAM428
+    - MARIADB_PASSWORD=<30718054>
+    - MARIADB_DATABASE=final
+  volumes:
+    - db_data:/bitnami
+
+webserver:
+  image: nginx
+  ports:
+    - '80:80'
+    - '443:443'
+  depends_on:
+    - drupal
     
-    location / {
-      proxy_pass http://drupal:8080;
-      proxy_set_header Host $host;
-      proxy_set_header X-Real-IP $remote_addr;
-    }
-  }
-}
+    volumes:
+  - ./nginx.conf:/etc/nginx/nginx.conf
+
