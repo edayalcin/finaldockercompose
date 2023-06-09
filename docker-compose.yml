@@ -1,9 +1,18 @@
-db:
-  image: bitnami/mariadb:latest
-  environment:
-    - MARIADB_USER=YAM428
-    - MARIADB_PASSWORD=<30718054>
-    - MARIADB_DATABASE=final
-  volumes:
-    - db_data:/bitnami
+worker_processes 1;
 
+events {
+  worker_connections 1024;
+}
+
+http {
+  server {
+    listen 80;
+    server_name edayalcin.me;
+    
+    location / {
+      proxy_pass http://drupal:8080;
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+    }
+  }
+}
